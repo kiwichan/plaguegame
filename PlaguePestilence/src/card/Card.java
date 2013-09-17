@@ -1,22 +1,24 @@
-package game;
+package card;
 
-import java.lang.String;
+import game.Player;
 
 public abstract class Card {
 	
-	public enum Type{SUN, RAT, UNKOWN} 
-	private String name;
-	private String action;
-	private Type type;
+	 CardName name;
+	 String action;
+	 CardType type;
+	
+	public Card(CardName n, String a, CardType t){
+		this.name = n;
+		this.action = a;
+		this.type = t;
+	}
 	
 	public Card(){
-		name = "";
-		action = "";
-		type = Type.UNKOWN;
 	}
 	
 	public String getName(){
-		return this.name;
+		return name.toString();
 	}
 	
 	public String getAction(){
@@ -31,6 +33,12 @@ public abstract class Card {
 	public boolean equals(Card other){
 		return this.name.equals(other.getName());
 	}
-	public abstract boolean play();
+	
+	protected void updateAction(String act){
+		this.action = act;
+	}
+	public abstract boolean play(Player p);
+
+
 
 }
