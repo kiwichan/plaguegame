@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Random;
+import java.util.Scanner;
 import java.util.Vector;
 
 import card.Card;
@@ -31,6 +32,26 @@ public class Player {
 		}
 	}
 	
+	private void printHandChoice(){
+		for(int i=0; i<hand.size(); i++){
+			System.out.print(i+ "-");
+			hand.get(i).printDescription();
+		}
+		int ind = hand.size()-1;
+		System.out.println("Which card do you want to play/discard? "+"0-"+ind+"> ");
+	}
+	
+	public Card pickCard(Scanner in){
+		int choice;
+		do{	
+			printHandChoice();
+			choice = in.nextInt();
+		}while(!(choice>=0&&choice<hand.size()));
+		Card c = hand.get(choice);
+		hand.remove(choice);
+		return c;
+	}
+	
 	public Vector<Card> getHand(){
 		return hand;
 	}
@@ -57,7 +78,7 @@ public class Player {
 		return amount;
 	}
 	
-	public int roll(boolean plague){
+	public void rollPP(boolean plague){
 		int raw = roll()+roll();
 		int numImp = improvements.size();
 		int total = raw;
@@ -67,8 +88,41 @@ public class Player {
 			total = raw+numImp;
 		}
 		System.out.println("You rolled a "+raw+" plus "+numImp+" for a total roll of "+ total);
-		return total;
+		if(plague){
+			if(total <=3){
+				System.out.println("No losses, Jackpot!");
+			}else if(total <=5){
+				System.out.println("Lose 5PP");
+				this.population = this.population-5;
+			}else if(total <=8){
+				System.out.println("Lose 10PP");
+				this.population = this.population-10;
+			}else if(total <= 11){
+				System.out.println("Lose 15PP");
+				this.population = this.population-15;
+			}else{
+				System.out.println("Lose 20PP, Bummer!");
+				this.population = this.population-20;
+			}
+		}else{
+			if(total <=3){
+				System.out.println("No gain, bummer!");
+			}else if(total <=5){
+				System.out.println("Gain 5PP");
+				this.population = this.population+5;
+			}else if(total <=8){
+				System.out.println("Gain 10PP");
+				this.population = this.population+10;
+			}else if(total <= 11){
+				System.out.println("Gain 15PP");
+				this.population = this.population+15;
+			}else{
+				System.out.println("Gain 20PP, Jackpot!");
+				this.population = this.population+20;
+			}
+		}
 	}
+	
 	public int addPop(int pp){
 		this.population = this.population+pp;
 		return this.population;
@@ -89,5 +143,8 @@ public class Player {
 		return population > 0;
 	}
 	
+	public boolean play(Card c){
+		return hand.remove(c);
+	}
 
 }

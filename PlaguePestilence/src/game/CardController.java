@@ -12,13 +12,14 @@ public class CardController {
 	public CardController(){
 		deck = new Vector<Card>(66);
 		discard = new Vector<Card>(66);
-		startDeck();
+		startTestDeck();
 	}
 	
 	
 	public void initializeDeck(){
 		//Create Start Deck
-		startDeck();
+		//startDeck();
+		startTestDeck();
 		Collections.shuffle(deck);
 	}
 	
@@ -44,12 +45,26 @@ public class CardController {
 	}
 	
 	public void shuffleDS(){
-		deck.add(new DeathShip());
+		DeathShip ds = new DeathShip();
+		deck.add(ds);
 		Collections.shuffle(deck);
+		int deathInd = deck.indexOf(ds);
+		System.out.println("DeathShip is at "+ deathInd);
 	}
+	
+	private void startTestDeck(){
+		while(deck.size() < 20){
+			deck.add(new MajorAttackCard(CardName.FAMINE));
+			deck.add(new MajorAttackCard(CardName.FLOOD));
+			deck.add(new MajorAttackCard(CardName.DROUGHT));
+			deck.add(new MajorAttackCard(CardName.PEST));
+			deck.add(new AddPPCard(CardName.BUMPER));
+		}
+	}
+	
 	private void startDeck(){
 	 int j = 0;
-	 while(deck.size()< 40){
+	 while(deck.size()< 25){
 		deck.add(new MajorAttackCard(CardName.FAMINE));
 		deck.add(new MajorAttackCard(CardName.FLOOD));
 		deck.add(new MajorAttackCard(CardName.DROUGHT));
@@ -75,5 +90,11 @@ public class CardController {
 		}
 		System.out.println("");
 		System.out.println(Global.DELIM);
+	}
+
+
+	public void discard(Card c) {
+		// TODO Auto-generated method stub
+		discard.add(c);
 	}
 }

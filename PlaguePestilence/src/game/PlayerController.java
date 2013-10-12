@@ -3,14 +3,13 @@ package game;
 import java.util.Scanner;
 import java.util.Vector;
 
-import card.Card;
+import card.*;
 
 public class PlayerController {
 
 	private Vector<Player> players;
 	private Player currPlayer;
 	private CardController cardCtrl;
-	private int numInPlay;
 	private boolean plague;
 	
 	public PlayerController(int numPlayers){
@@ -22,7 +21,6 @@ public class PlayerController {
 		}
 		else{
 			initializePlayers(numPlayers);
-			numInPlay = players.size();
 			currPlayer = getStartPlayer();
 			cardCtrl = new CardController();
 			System.out.println("Dealing hand out");
@@ -91,65 +89,100 @@ public class PlayerController {
 		}
 	}
 	
-	public boolean winnerFound(){
-		return (this.numInPlay <= 1);
+
+	public int numInPlay(){
+		int num = 0;
+		for(int i=0; i<players.size(); i++){
+			if(players.get(i).inPlay()){
+				num++;
+			}
+		}
+		return num;
+	}
+	
+	private Player getWinner(){
+		int i=0;
+		while(i<players.size()){
+			if(players.get(i).inPlay()){
+				return players.get(i);
+			}
+			i++;
+		}
+		return null;
 	}
 
 	public void takeTurn(Scanner in) {
-		// TODO Auto-generated method stub
-		roll();
-		if(currPlayer.inPlay()){
-			pickUp();
-			
+		while(numInPlay() > 1){
+			System.out.println(currPlayer.getName());
+			currPlayer.rollPP(plague);
+			if(currPlayer.inPlay()){
+				//only pick card to play if not deathship
+				if(!pickedUpDeath(in)){
+					Card c = currPlayer.pickCard(in);
+					System.out.println("Play or Discard "+c.getName()+"? P/D");
+					//String r = in.next();
+					String r = "P";
+					if("P".equalsIgnoreCase(r)){
+						//removes from players hand. And play the card.
+						currPlayer.play(c);
+						c.play(players, currPlayer, in);
+						
+					}else{
+						System.out.println("Discarding "+ c.getName());
+					}
+					cardCtrl.discard(c);
+				}
+				//we don't update player because we've already updated player in Death.
+				printPlayers();
+				System.out.println(Global.DELIM);
+			}else{
+				System.out.println("I'm dead");
+			}
+			currPlayer = getNextPlayer();
 		}
+		System.out.println(getWinner().getName()+" is the winner!");
 	}
-	
-	private void pickUp(){
+
+
+	//pick up cards. Returns whether deathship was picked up.
+	private boolean pickedUpDeath(Scanner in){
 		int numCIH = currPlayer.getHand().size();
-		while(numCIH < 6){
+		do{
 			Card c = cardCtrl.dealCard();
-			if(!currPlayer.pickUpCard(c)){
-				System.out.println("Oh Oh, didn't add card into hand");
+			//play deathship right away.
+			if(c instanceof DeathShip){
+				//Player next = getNextPlayer();
+				//currPlayer = next;
+				c.play(players, currPlayer, in);
+				currPlayer = getNextPlayer();
+				plague = true;
+				return true;
+				
+			}else{
+				if(!currPlayer.pickUpCard(c)){
+					System.out.println("Oh Oh, didn't add card into hand");
+				}
 			}
 			numCIH++;
-		}
+		}while(numCIH < 6);
+		return false;
 	}
 	
-	private void roll(){
-		int r = currPlayer.roll(plague);
-		if(plague){
-			if(r <=3){
-				System.out.println("No losses, Jackpot!");
-			}else if(r <=5){
-				System.out.println("Lose 5PP");
-				currPlayer.subPop(5);
-			}else if(r <=8){
-				System.out.println("Lose 10PP");
-				currPlayer.subPop(10);
-			}else if(r <= 11){
-				System.out.println("Lose 15PP");
-				currPlayer.subPop(15);
-			}else{
-				System.out.println("Lose 20PP, Bummer!");
-				currPlayer.subPop(20);
+	//pre-cond: there are more than 1 player in play.
+	private Player getNextPlayer(){
+		int currInd = players.indexOf(this.currPlayer);
+		int nextInd = currInd;
+		int endInd = players.size()-1;
+		Player next;
+		//iterate through 
+		do{	
+			nextInd++;
+			if(nextInd > endInd){
+			nextInd = 0;
 			}
-		}else{
-			if(r <=3){
-				System.out.println("No gain, bummer!");
-			}else if(r <=5){
-				System.out.println("Gain 5PP");
-				currPlayer.addPop(5);
-			}else if(r <=8){
-				System.out.println("Gain 10PP");
-				currPlayer.addPop(10);
-			}else if(r <= 11){
-				System.out.println("Gain 15PP");
-				currPlayer.addPop(15);
-			}else{
-				System.out.println("Gain 20PP, Jackpot!");
-				currPlayer.addPop(20);
-			}
-		}
+			next = players.get(nextInd);
+		}while(!next.inPlay());
+		return next;
 	}
 	
 	

@@ -2,6 +2,9 @@ package card;
 
 import game.Player;
 
+import java.util.Scanner;
+import java.util.Vector;
+
 public abstract class Card {
 	
 	 CardName name;
@@ -29,6 +32,9 @@ public abstract class Card {
 		System.out.println(name+": "+action);
 	}
 	
+	public CardType getType(){
+		return this.type;
+	}
 	//override equals
 	public boolean equals(Card other){
 		return this.name.equals(other.getName());
@@ -37,8 +43,8 @@ public abstract class Card {
 	protected void updateAction(String act){
 		this.action = act;
 	}
-	public abstract boolean play(Player p);
+	//public abstract boolean play(Player p);
 
-
+	public abstract boolean play(Vector<Player> players, Player currPlayer, Scanner in);
 
 }
